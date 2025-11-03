@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CypherX Trader - Real Wallet Connection</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@4.2.0/dist/web3.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🎭 CypherX</h1>
+                <div class="wallet-section">
+                    <div id="wallet-connected" class="wallet-status hidden">
+                        <span class="wallet-address" id="wallet-address"></span>
+                        <span class="wallet-balance" id="wallet-balance"></span>
+                        <button class="btn-disconnect-small" onclick="disconnectWallet()">🚪</button>
+                    </div>
+                    <button id="connect-wallet-btn" class="connect-btn" onclick="showSection('wallet-connect')">
+                        🔗 Connect Wallet
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Wallet Connect Screen -->
+            <section id="wallet-connect" class="section active">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🔗 Connect Your Wallet</h3>
+                    </div>
+                    <div class="wallet-options">
+                        <div class="wallet-option" onclick="connectMetaMask()">
+                            <div class="wallet-icon">🦊</div>
+                            <div class="wallet-info">
+                                <div class="wallet-name">MetaMask</div>
+                                <div class="wallet-desc">Ethereum & EVM Chains</div>
+                            </div>
+                            <div class="wallet-badge" id="metamask-status">POPULAR</div>
+                        </div>
+                        
+                        <div class="wallet-option" onclick="connectWalletConnect()">
+                            <div class="wallet-icon">⚡</div>
+                            <div class="wallet-info">
+                                <div class="wallet-name">WalletConnect</div>
+                                <div class="wallet-desc">Multi-Chain & Mobile</div>
+                            </div>
+                            <div class="wallet-badge">QR CODE</div>
+                        </div>
+                        
+                        <div class="wallet-option" onclick="connectCoinbaseWallet()">
+                            <div class="wallet-icon">🔷</div>
+                            <div class="wallet-info">
+                                <div class="wallet-name">Coinbase Wallet</div>
+                                <div class="wallet-desc">Coinbase Ecosystem</div>
+                            </div>
+                            <div class="wallet-badge">MOBILE</div>
+                        </div>
+
+                        <div class="wallet-option" onclick="connectPhantom()">
+                            <div class="wallet-icon">👻</div>
+                            <div class="wallet-info">
+                                <div class="wallet-name">Phantom</div>
+                                <div class="wallet-desc">Solana & Multi-Chain</div>
+                            </div>
+                            <div class="wallet-badge">SOLANA</div>
+                        </div>
+                    </div>
+                    
+                    <div class="network-info">
+                        <h4>🌐 Supported Networks</h4>
+                        <div class="networks-list">
+                            <span class="network-tag">Ethereum</span>
+                            <span class="network-tag">Polygon</span>
+                            <span class="network-tag">BNB Chain</span>
+                            <span class="network-tag">Arbitrum</span>
+                            <span class="network-tag">Solana</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Connection Loading -->
+            <section id="connection-loading" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>⏳ Connecting...</h3>
+                    </div>
+                    <div class="loading-content">
+                        <div class="loading-spinner"></div>
+                        <h4 id="loading-message">Initializing Wallet Connection</h4>
+                        <p>Please approve the connection in your wallet</p>
+                        <div class="connection-steps">
+                            <div class="connection-step active">
+                                <div class="step-icon">🔍</div>
+                                <span>Detecting Wallet</span>
+                            </div>
+                            <div class="connection-step">
+                                <div class="step-icon">📝</div>
+                                <span>Requesting Accounts</span>
+                            </div>
+                            <div class="connection-step">
+                                <div class="step-icon">✅</div>
+                                <span>Getting Balance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Principal -->
+            <section id="dashboard" class="section">
+                <div class="wallet-overview">
+                    <div class="wallet-card">
+                        <div class="wallet-header">
+                            <h3>💰 Wallet Balance</h3>
+                            <span class="network-indicator">
+                                <span class="network-dot" id="network-dot"></span>
+                                <span id="network-name">Ethereum</span>
+                            </span>
+                        </div>
+                        <div class="balance-amount" id="real-balance">0.00 ETH</div>
+                        <div class="balance-usd" id="balance-usd">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="virtual-balance">$10,000.00</div>
+                            <div class="stat-label">Trading Balance</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="portfolio-value">$10,000.00</div>
+                            <div class="stat-label">Portfolio Value</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="pnl">+$0.00</div>
+                            <div class="stat-label">P&L</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔄</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-trades">0</div>
+                            <div class="stat-label">Total Trades</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Trading Signal -->
+                <div class="signal-card">
+                    <div class="signal-header">
+                        <span class="signal-icon">🤖</span>
+                        <span class="signal-title">AI Trading Signal</span>
+                        <span class="signal-status active">LIVE</span>
+                    </div>
+                    <div class="signal-content">
+                        <div id="current-signal">Analyzing market trends...</div>
+                        <div class="signal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 78%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Interface -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🤖 AI Trading Interface</h3>
+                        <div class="trading-mode">
+                            <span class="mode-indicator simulation">SIMULATION</span>
+                        </div>
+                    </div>
+                    <div class="trading-interface">
+                        <div class="signal-banner" id="trade-signal">
+                            🔍 AI Analyzing Markets...
+                        </div>
+                        <div class="coins-grid" id="coins-grid">
+                            <!-- Trading buttons will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Trades -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Recent Trades</h3>
+                        <button class="btn-refresh" onclick="generateRandomTrade()">🔄</button>
+                    </div>
+                    <div id="recent-trades" class="trades-list">
+                        <div class="no-trades">No trades yet</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Portfolio Section -->
+            <section id="portfolio" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>💼 Trading Portfolio</h3>
+                    </div>
+                    <div class="portfolio-content">
+                        <div class="cash-balance">
+                            <span>Virtual Cash:</span>
+                            <span id="cash-balance">$10,000.00</span>
+                        </div>
+                        <div id="portfolio-positions" class="positions-list">
+                            <div class="no-positions">No positions open</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wallet Info Section -->
+            <section id="wallet-info" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🔗 Wallet Information</h3>
+                    </div>
+                    <div class="wallet-details">
+                        <div class="wallet-detail-item">
+                            <span>Wallet Type:</span>
+                            <span id="wallet-type-display">Not Connected</span>
+                        </div>
+                        <div class="wallet-detail-item">
+                            <span>Address:</span>
+                            <span id="wallet-full-address" class="address-text">Not Connected</span>
+                        </div>
+                        <div class="wallet-detail-item">
+                            <span>Network:</span>
+                            <span id="network-info">Not Connected</span>
+                        </div>
+                        <div class="wallet-detail-item">
+                            <span>Balance:</span>
+                            <span id="wallet-full-balance">Not Connected</span>
+                        </div>
+                        <div class="wallet-detail-item">
+                            <span>Connected Since:</span>
+                            <span id="connection-time">Not Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="disconnect-section">
+                        <button class="btn-disconnect" onclick="disconnectWallet()">
+                            🚪 Disconnect Wallet
+                        </button>
+                        <p class="disclaimer">Disconnecting will not affect your real funds</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Navigation -->
+        <nav id="bottom-nav" class="bottom-nav hidden">
+            <button class="nav-btn active" onclick="showSection('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Trade</span>
+            </button>
+            <button class="nav-btn" onclick="showSection('portfolio')">
+                <span class="nav-icon">💼</span>
+                <span class="nav-label">Portfolio</span>
+            </button>
+            <button class="nav-btn" onclick="showSection('wallet-info')">
+                <span class="nav-icon">🔗</span>
+                <span class="nav-label">Wallet</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Connection Error Modal -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>❌ Connection Error</h3>
+                <button class="modal-close" onclick="closeModal('error-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="error-message"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeModal('error-modal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✅ Connected Successfully!</h3>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔗</div>
+                    <h3 style="color: #10b981; margin-bottom: 1rem;">Wallet Connected!</h3>
+                    <p>Your wallet is now connected to CypherX Trader</p>
+                    <div style="background: #1a1b2f; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                        <div style="font-family: monospace; font-size: 0.9rem;" id="connected-address-display"></div>
+                        <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 0.5rem;" id="connected-network"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeModal('success-modal'); showSection('dashboard');">Start Trading</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
