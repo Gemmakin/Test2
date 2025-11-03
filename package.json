@@ -1,0 +1,8 @@
+{
+  "name": "cypherx-wallet",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "web3": "^4.2.0"
+  }
+}
